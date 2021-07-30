@@ -47,7 +47,11 @@ class UserController {
         reject(e);
       };
 
-      fileReader.readAsDataURL(file);
+      if (file) {
+        fileReader.readAsDataURL(file);
+      } else {
+        resolve("../dist/img/boxed-bg.jpg");
+      }
     });
   }
 
@@ -61,6 +65,9 @@ class UserController {
         if (field.checked) {
           user[field.name] = field.value;
         }
+        // verifica se o checkbox admin esta ativado
+      } else if (field.name === "admin") {
+        user[field.name] = field.checked;
       } else {
         user[field.name] = field.value;
       }
@@ -97,7 +104,7 @@ class UserController {
       </td>
       <td>${dataUser.name}</td>
       <td>${dataUser.email}</td>
-      <td>${dataUser.admin}</td>
+      <td>${dataUser.admin ? "Sim" : "Não"}</td>
       <td>${dataUser.birth}</td>
       <td>
         <button
