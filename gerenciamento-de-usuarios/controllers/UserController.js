@@ -7,13 +7,47 @@ class UserController {
   }
 
   // método para evendo de click do botao submit
+  // também para tratar o upload de imagem
   onSubmit() {
     this.formEl.addEventListener("submit", (event) => {
       event.preventDefault();
 
-      const user = this.getValues();
+      const values = this.getValues();
 
-      this.addLine(user);
+      this.getPhoto().then(
+        (content) => {
+          values.photo = content;
+          this.addLine(values);
+        },
+        (e) => {
+          console.error(e);
+        }
+      );
+    });
+  }
+
+  // método para ler o arquivo de upload - fotos
+  getPhoto() {
+    return new Promise((resolve, reject) => {
+      const fileReader = new FileReader();
+
+      const elements = [...this.formEl.elements].filter((item) => {
+        if (item.name === "photo") {
+          return item;
+        }
+      });
+
+      const file = elements[0].files[0];
+
+      fileReader.onload = () => {
+        resolve(fileReader.result);
+      };
+
+      fileReader.onerror = (e) => {
+        reject(e);
+      };
+
+      fileReader.readAsDataURL(file);
     });
   }
 
@@ -56,7 +90,7 @@ class UserController {
     <tr>
       <td>
         <img
-          src="dist/img/user1-128x128.jpg"
+          src="${dataUser.photo}"
           alt="User Image"
           class="img-circle img-sm"
         />
