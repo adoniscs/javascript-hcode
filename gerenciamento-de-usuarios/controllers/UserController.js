@@ -18,6 +18,8 @@ class UserController {
 
       let values = this.getValues();
 
+      if (!values) return false;
+
       this.getPhoto().then(
         (content) => {
           values.photo = content;
@@ -68,7 +70,17 @@ class UserController {
   // e depois monta um JSON
   getValues() {
     const user = {};
+    let isValid = true;
+
     [...this.formEl.elements].forEach((field) => {
+      if (
+        ["name", "email", "password"].indexOf(field.name) > -1 &&
+        !field.value
+      ) {
+        field.parentElement.classList.add("has-error");
+        isValid = false;
+      }
+
       // verifica o campo radio que está checked
       if (field.name === "gender") {
         if (field.checked) {
@@ -81,6 +93,10 @@ class UserController {
         user[field.name] = field.value;
       }
     });
+
+    if (!isValid) {
+      return false;
+    }
 
     // instanciando a classe User.js, assim, sera criado
     // o objeto objectUser e os dados dos campos passara
