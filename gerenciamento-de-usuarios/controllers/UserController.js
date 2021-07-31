@@ -18,6 +18,8 @@ class UserController {
 
       let values = this.getValues();
 
+      if (!values) return false;
+
       this.getPhoto().then(
         (content) => {
           values.photo = content;
@@ -68,7 +70,17 @@ class UserController {
   // e depois monta um JSON
   getValues() {
     const user = {};
+    let isValid = true;
+
     [...this.formEl.elements].forEach((field) => {
+      if (
+        ["name", "email", "password"].indexOf(field.name) > -1 &&
+        !field.value
+      ) {
+        field.parentElement.classList.add("has-error");
+        isValid = false;
+      }
+
       // verifica o campo radio que está checked
       if (field.name === "gender") {
         if (field.checked) {
@@ -81,6 +93,10 @@ class UserController {
         user[field.name] = field.value;
       }
     });
+
+    if (!isValid) {
+      return false;
+    }
 
     // instanciando a classe User.js, assim, sera criado
     // o objeto objectUser e os dados dos campos passara
@@ -100,37 +116,58 @@ class UserController {
   // método que cria o layout apos os campos serem
   // preenchidos atraves de um objeto
   addLine(dataUser) {
-    this.tableEl.insertAdjacentHTML(
-      "beforeend",
-      `
-    <tr>
-      <td>
-        <img
-          src="${dataUser.photo}"
-          alt="User Image"
-          class="img-circle img-sm"
-        />
-      </td>
-      <td>${dataUser.name}</td>
-      <td>${dataUser.email}</td>
-      <td>${dataUser.admin ? "Sim" : "Não"}</td>
-      <td>${Utils.dateFormat(dataUser.register)}</td>
-      <td>
-        <button
-          type="button"
-          class="btn btn-primary btn-xs btn-flat"
-        >
-          Editar
-        </button>
-        <button
-          type="button"
-          class="btn btn-danger btn-xs btn-flat"
-        >
-          Excluir
-        </button>
-      </td>
-    </tr>
-  `
-    );
+    let tr = document.createElement("tr");
+
+    tr.dataset.user = JSON.stringify(dataUser);
+
+    tr.innerHTML = `
+        <tr>
+          <td>
+            <img
+              src="${dataUser.photo}"
+              alt="User Image"
+              class="img-circle img-sm"
+            />
+          </td>
+          <td>${dataUser.name}</td>
+          <td>${dataUser.email}</td>
+          <td>${dataUser.admin ? "Sim" : "Não"}</td>
+          <td>${Utils.dateFormat(dataUser.register)}</td>
+          <td>
+            <button
+              type="button"
+              class="btn btn-primary btn-xs btn-flat"
+            >
+              Editar
+            </button>
+            <button
+              type="button"
+              class="btn btn-danger btn-xs btn-flat"
+            >
+              Excluir
+            </button>
+          </td>
+        </tr>
+      `;
+
+    this.tableEl.appendChild(tr);
+
+    this.updateCount();
+  }
+
+  updateCount() {
+    let numberUsers = 0;
+    let numberAdmin = 0;
+
+    [...this.tableEl.children].forEach((tr) => {
+      numberUsers++;
+
+      let user = JSON.parse(tr.dataset.user);
+
+      if (user._admin) numberAdmin++;
+    });
+
+    document.querySelector("#number-users").innerHTML = numberUsers;
+    document.querySelector("#number-users-admin").innerHTML = numberAdmin;
   }
 }
