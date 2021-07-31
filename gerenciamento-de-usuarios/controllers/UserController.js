@@ -12,12 +12,21 @@ class UserController {
     this.formEl.addEventListener("submit", (event) => {
       event.preventDefault();
 
-      const values = this.getValues();
+      let btn = this.formEl.querySelector("[type=submit]");
+
+      btn.disabled = true;
+
+      let values = this.getValues();
 
       this.getPhoto().then(
         (content) => {
           values.photo = content;
+
           this.addLine(values);
+
+          this.formEl.reset();
+
+          btn.disabled = false;
         },
         (e) => {
           console.error(e);
@@ -29,15 +38,15 @@ class UserController {
   // método para ler o arquivo de upload - fotos
   getPhoto() {
     return new Promise((resolve, reject) => {
-      const fileReader = new FileReader();
+      let fileReader = new FileReader();
 
-      const elements = [...this.formEl.elements].filter((item) => {
+      let elements = [...this.formEl.elements].filter((item) => {
         if (item.name === "photo") {
           return item;
         }
       });
 
-      const file = elements[0].files[0];
+      let file = elements[0].files[0];
 
       fileReader.onload = () => {
         resolve(fileReader.result);
@@ -50,7 +59,7 @@ class UserController {
       if (file) {
         fileReader.readAsDataURL(file);
       } else {
-        resolve("../dist/img/boxed-bg.jpg");
+        resolve("./dist/img/boxed-bg.jpg");
       }
     });
   }
@@ -105,7 +114,7 @@ class UserController {
       <td>${dataUser.name}</td>
       <td>${dataUser.email}</td>
       <td>${dataUser.admin ? "Sim" : "Não"}</td>
-      <td>${dataUser.birth}</td>
+      <td>${Utils.dateFormat(dataUser.register)}</td>
       <td>
         <button
           type="button"
